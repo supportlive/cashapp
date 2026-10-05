@@ -1,572 +1,592 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cash App & Bitcoin Wallet</title>
-    <style>
-        /* Base Reset & Typography */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #000000; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+   <style> /* Base Reset & Typography */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background-color: #000000; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
 
-        /* App Outer Frame */
-        .app-container { width: 100%; max-width: 420px; height: 100vh; height: 100dvh; background-color: #000000; position: relative; overflow: hidden; color: #ffffff; }
+/* App Outer Frame */
+.app-container { width: 100%; max-width: 420px; height: 100vh; height: 100dvh; background-color: #000000; position: relative; overflow: hidden; color: #ffffff; }
 
-        /* Screen Manager */
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 65px); display: flex; flex-direction: column; background-color: #000000; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1; overflow-y: auto; }
-        .screen.active { transform: translateX(0); z-index: 5; }
-        .screen.full-height { height: 100%; }
-        
-        /* The Overlay z-index was increased to 100 to completely cover the bottom nav */
-        .screen.overlay { height: 100%; z-index: 100; } 
+/* Screen Manager */
+.screen { position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 65px); display: flex; flex-direction: column; background-color: #000000; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1; overflow-y: auto; }
+.screen.active { transform: translateX(0); z-index: 5; }
+.screen.full-height { height: 100%; }
+.screen.overlay { height: 100%; z-index: 100; } 
 
-        /* --- BOTTOM NAVIGATION BAR --- */
-        .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; height: 65px; background-color: #000000; border-top: 1px solid #1c1c1e; display: flex; justify-content: space-around; align-items: center; z-index: 50; }
-        .bottom-nav.hidden { display: none; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8e8e93; font-size: 11px; font-weight: 600; cursor: pointer; border: none; background: none; }
-        .nav-item.active { color: #ffffff; }
-        .nav-item svg { width: 22px; height: 22px; fill: currentColor; margin-bottom: 2px; }
+/* --- BOTTOM NAVIGATION BAR --- */
+.bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; height: 65px; background-color: #000000; border-top: 1px solid #1c1c1e; display: flex; justify-content: space-around; align-items: center; z-index: 50; }
+.bottom-nav.hidden { display: none; }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8e8e93; font-size: 11px; font-weight: 600; cursor: pointer; border: none; background: none; }
+.nav-item.active { color: #ffffff; }
+.nav-item svg { width: 22px; height: 22px; fill: currentColor; margin-bottom: 2px; }
 
-        /* =========================================================
-           SCREEN 0: SIGN IN
-        ========================================================= */
-        .login-screen { padding: 40px 24px; display: flex; flex-direction: column; justify-content: center; height: 100%; background: #000000; }
-        .login-logo { width: 64px; height: 64px; background-color: #00d632; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 36px; font-weight: 800; margin: 0 auto 30px; }
-        .login-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 24px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #a0a0a0; margin-bottom: 6px; }
-        .form-group input { width: 100%; padding: 14px 16px; background-color: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 12px; color: #ffffff; font-size: 16px; outline: none; font-weight: 600; }
-        .form-group input:focus { border-color: #00d632; }
-        .btn-submit-green { width: 100%; background-color: #00d632; color: #ffffff; border: none; padding: 16px; border-radius: 28px; font-size: 17px; font-weight: 700; cursor: pointer; margin-top: 12px; }
+/* SCREEN 0: SIGN IN */
+.login-screen { padding: 40px 24px; display: flex; flex-direction: column; justify-content: center; height: 100%; background: #000000; }
+.login-logo { width: 64px; height: 64px; background-color: #00d632; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 36px; font-weight: 800; margin: 0 auto 30px; }
+.login-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 24px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #a0a0a0; margin-bottom: 6px; }
+.form-group input { width: 100%; padding: 14px 16px; background-color: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 12px; color: #ffffff; font-size: 16px; outline: none; font-weight: 600; }
+.form-group input:focus { border-color: #00d632; }
+.btn-submit-green { width: 100%; background-color: #00d632; color: #ffffff; border: none; padding: 16px; border-radius: 28px; font-size: 17px; font-weight: 700; cursor: pointer; margin-top: 12px; }
 
-        /* =========================================================
-           MONEY / HOME DASHBOARD
-        ========================================================= */
-        .money-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 10px; }
-        .money-title { font-size: 28px; font-weight: 800; }
-        .money-actions-top { display: flex; gap: 16px; align-items: center; }
-        .profile-btn { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid #333; background-color: #2c2c2e; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 14px; }
+/* MONEY / HOME DASHBOARD */
+.money-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 10px; }
+.money-title { font-size: 28px; font-weight: 800; }
+.money-actions-top { display: flex; gap: 16px; align-items: center; }
+.profile-btn { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid #333; background-color: #2c2c2e; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 14px; }
 
-        .card-banner { margin: 10px 20px; background: linear-gradient(135deg, #1f1d1a 0%, #3a2e22 50%, #12100e 100%); border-radius: 16px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .card-chip-text { font-size: 13px; font-weight: 700; color: #d1d1d1; display: flex; align-items: center; gap: 6px; }
-        .cashtag-badge { font-size: 14px; font-weight: 700; color: #e5a968; }
+.card-banner { margin: 10px 20px; background: linear-gradient(135deg, #1f1d1a 0%, #3a2e22 50%, #12100e 100%); border-radius: 16px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+.card-chip-text { font-size: 13px; font-weight: 700; color: #d1d1d1; display: flex; align-items: center; gap: 6px; }
+.cashtag-badge { font-size: 14px; font-weight: 700; color: #e5a968; }
 
-        .balance-section { padding: 15px 20px 5px; }
-        .balance-label-row { display: flex; justify-content: space-between; align-items: center; color: #999; font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-        .main-balance-text { font-size: 42px; font-weight: 800; letter-spacing: -1px; }
+.balance-section { padding: 15px 20px 5px; }
+.balance-label-row { display: flex; justify-content: space-between; align-items: center; color: #999; font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.main-balance-text { font-size: 42px; font-weight: 800; letter-spacing: -1px; }
 
-        .btn-row-dual { display: flex; gap: 12px; padding: 15px 20px; }
-        .btn-dark-pill { flex: 1; background-color: #1c1c1e; border: none; color: #ffffff; padding: 14px; border-radius: 24px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn-row-dual { display: flex; gap: 12px; padding: 15px 20px; }
+.btn-dark-pill { flex: 1; background-color: #1c1c1e; border: none; color: #ffffff; padding: 14px; border-radius: 24px; font-size: 15px; font-weight: 700; cursor: pointer; }
 
-        .dashboard-card { background-color: #1c1c1e; border-radius: 18px; padding: 18px; margin: 0 20px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .status-pill-green { width: 10px; height: 10px; background-color: #00d632; border-radius: 3px; display: inline-block; margin-right: 8px; }
+.dashboard-card { background-color: #1c1c1e; border-radius: 18px; padding: 18px; margin: 0 20px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.status-pill-green { width: 10px; height: 10px; background-color: #00d632; border-radius: 3px; display: inline-block; margin-right: 8px; }
 
-        /* =========================================================
-           BITCOIN DETAIL PAGE
-        ========================================================= */
-        .btc-nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; }
-        .btc-balance-hero { padding: 0 20px 10px; }
-        .btc-amount { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; }
-        .btc-fiat-sub { font-size: 15px; color: #8e8e93; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
-        .btc-change-row { font-size: 15px; font-weight: 700; color: #00c2ff; margin-top: 10px; }
+/* BITCOIN DETAIL PAGE */
+.btc-nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; }
+.btc-balance-hero { padding: 0 20px 10px; }
+.btc-amount { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; }
+.btc-fiat-sub { font-size: 15px; color: #8e8e93; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.btc-change-row { font-size: 15px; font-weight: 700; color: #00c2ff; margin-top: 10px; }
 
-        .chart-container { width: 100%; height: 150px; padding: 10px 0; }
-        .time-filter-row { display: flex; justify-content: space-around; padding: 0 20px 20px; }
-        .time-pill { font-size: 12px; font-weight: 700; color: #8e8e93; padding: 6px 12px; border-radius: 14px; cursor: pointer; }
-        .time-pill.active { background-color: #2c2c2e; color: #ffffff; }
+.chart-container { width: 100%; height: 150px; padding: 10px 0; }
+.time-filter-row { display: flex; justify-content: space-around; padding: 0 20px 20px; }
+.time-pill { font-size: 12px; font-weight: 700; color: #8e8e93; padding: 6px 12px; border-radius: 14px; cursor: pointer; }
+.time-pill.active { background-color: #2c2c2e; color: #ffffff; }
 
-        .btc-action-row { display: flex; gap: 10px; padding: 0 20px 25px; }
-        .btn-cyan { flex: 1; background-color: #00c2ff; color: #000000; border: none; padding: 14px 0; border-radius: 24px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; }
-        .btn-cyan-icon { width: 48px; background-color: #00c2ff; color: #000000; border: none; border-radius: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+.btc-action-row { display: flex; gap: 10px; padding: 0 20px 25px; }
+.btn-cyan { flex: 1; background-color: #00c2ff; color: #000000; border: none; padding: 14px 0; border-radius: 24px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+.btn-cyan-icon { width: 48px; background-color: #00c2ff; color: #000000; border: none; border-radius: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
 
-        /* =========================================================
-           GREEN NUMPAD & PAY FLOW
-        ========================================================= */
-        .green-screen { background-color: #00D632; color: #000000; height: 100%; }
-        .green-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; }
-        .green-display { font-size: 90px; font-weight: 800; text-align: center; margin-top: 20px; letter-spacing: -3px; }
-        
-        .green-numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px 50px; margin-top: auto; text-align: center; }
-        .num-key { font-size: 28px; font-weight: 700; background: none; border: none; color: #000000; cursor: pointer; padding: 12px 0; }
+/* GREEN NUMPAD & PAY FLOW */
+.green-screen { background-color: #00D632; color: #000000; height: 100%; }
+.green-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; }
+.green-display { font-size: 90px; font-weight: 800; text-align: center; margin-top: 20px; letter-spacing: -3px; }
 
-        .green-action-row-split { display: flex; gap: 15px; padding: 0 40px 15px; }
-        .btn-pool-request { flex: 1; background: rgba(0,0,0,0.08); border: none; color: #000000; padding: 14px 0; border-radius: 24px; font-size: 15px; font-weight: 700; cursor: pointer; }
-        
-        .green-action-row-full { padding: 0 40px 20px; }
-        .btn-pay-full { width: 100%; background: #000000; color: #ffffff; border: none; padding: 18px 0; border-radius: 30px; font-size: 17px; font-weight: 700; cursor: pointer; }
+.green-numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px 50px; margin-top: auto; text-align: center; }
+.num-key { font-size: 28px; font-weight: 700; background: none; border: none; color: #000000; cursor: pointer; padding: 12px 0; }
 
-        /* RECIPIENT SEARCH SCREEN */
-        .white-flow-screen { background-color: #ffffff; color: #000000; }
-        .flow-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
-        .flow-title-amount { font-size: 18px; font-weight: 800; }
-        .btn-pay-black { background-color: #000000; color: #ffffff; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 14px; cursor: pointer; }
+.green-action-row-split { display: flex; gap: 15px; padding: 0 40px 15px; }
+.btn-pool-request { flex: 1; background: rgba(0,0,0,0.08); border: none; color: #000000; padding: 14px 0; border-radius: 24px; font-size: 15px; font-weight: 700; cursor: pointer; }
 
-        .input-row { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; font-size: 15px; }
-        .input-label { width: 50px; color: #666; font-weight: 600; }
-        .input-field { border: none; outline: none; font-size: 15px; font-weight: 600; flex: 1; color: #000; }
+.green-action-row-full { padding: 0 40px 20px; }
+.btn-pay-full { width: 100%; background: #000000; color: #ffffff; border: none; padding: 18px 0; border-radius: 30px; font-size: 17px; font-weight: 700; cursor: pointer; }
 
-        .direct-target-info { padding: 24px 20px; background-color: #f9f9f9; border-bottom: 1px solid #eee; margin-top: 10px; transition: background-color 0.2s; }
-        .direct-target-label { font-size: 12px; font-weight: 700; color: #8e8e93; text-transform: uppercase; margin-bottom: 6px; }
-        .direct-target-val { font-size: 16px; font-weight: 700; color: #000; word-break: break-all; transition: color 0.2s; }
+/* RECIPIENT SEARCH SCREEN */
+.white-flow-screen { background-color: #ffffff; color: #000000; }
+.flow-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+.flow-title-amount { font-size: 18px; font-weight: 800; }
+.btn-pay-black { background-color: #000000; color: #ffffff; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 14px; cursor: pointer; }
 
-        /* MODALS */
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100; padding: 25px; }
-        .modal-overlay.active { display: flex; }
-        .modal-card { background: #ffffff; border-radius: 24px; padding: 24px 20px; text-align: center; width: 100%; max-width: 320px; color: #000; }
-        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
-        .modal-body { font-size: 14px; color: #666; line-height: 1.4; margin-bottom: 20px; }
-        .modal-btn { background: #000000; color: #ffffff; border: none; padding: 14px; border-radius: 20px; font-weight: 700; font-size: 15px; width: 100%; cursor: pointer; }
+.input-row { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; font-size: 15px; }
+.input-label { width: 50px; color: #666; font-weight: 600; }
+.input-field { border: none; outline: none; font-size: 15px; font-weight: 600; flex: 1; color: #000; }
 
-        /* DARK THEME BTC POPUP MODAL */
-        .btc-modal-dark { background: #1c1c1e; border-radius: 18px; padding: 0; text-align: center; width: 100%; max-width: 320px; color: #ffffff; overflow: hidden; }
-        .btc-modal-icon { width: 70px; height: 70px; background-color: #55bced; color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; margin: 30px auto 20px; letter-spacing: 0.5px; }
-        .btc-modal-text { font-size: 16px; color: #ffffff; line-height: 1.4; padding: 0 24px 30px; font-weight: 400; }
-        .btc-modal-actions { display: flex; flex-direction: column; border-top: 1px solid #333; }
-        .btc-btn-link { background: none; border: none; color: #55bced; font-size: 16px; font-weight: 600; padding: 18px; cursor: pointer; width: 100%; transition: background 0.2s; }
-        .btc-btn-link:active { background: #2c2c2e; }
-        .modal-divider { height: 1px; background-color: #333; width: 100%; }
+.direct-target-info { padding: 24px 20px; background-color: #f9f9f9; border-bottom: 1px solid #eee; margin-top: 10px; transition: background-color 0.2s; }
+.direct-target-label { font-size: 12px; font-weight: 700; color: #8e8e93; text-transform: uppercase; margin-bottom: 6px; }
+.direct-target-val { font-size: 16px; font-weight: 700; color: #000; word-break: break-all; transition: color 0.2s; }
 
-    </style>
+/* MODALS */
+.modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100; padding: 25px; }
+.modal-overlay.active { display: flex; }
+.modal-card { background: #ffffff; border-radius: 24px; padding: 24px 20px; text-align: center; width: 100%; max-width: 320px; color: #000; }
+.modal-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+.modal-body { font-size: 14px; color: #666; line-height: 1.4; margin-bottom: 20px; }
+.modal-btn { background: #000000; color: #ffffff; border: none; padding: 14px; border-radius: 20px; font-weight: 700; font-size: 15px; width: 100%; cursor: pointer; }
+
+/* DARK THEME BTC POPUP MODAL */
+.btc-modal-dark { background: #1c1c1e; border-radius: 18px; padding: 0; text-align: center; width: 100%; max-width: 320px; color: #ffffff; overflow: hidden; }
+.btc-modal-icon { width: 70px; height: 70px; background-color: #55bced; color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; margin: 30px auto 20px; letter-spacing: 0.5px; }
+.btc-modal-text { font-size: 16px; color: #ffffff; line-height: 1.4; padding: 0 24px 30px; font-weight: 400; }
+.btc-modal-actions { display: flex; flex-direction: column; border-top: 1px solid #333; }
+.btc-btn-link { background: none; border: none; color: #55bced; font-size: 16px; font-weight: 600; padding: 18px; cursor: pointer; width: 100%; transition: background 0.2s; }
+.btc-btn-link:active { background: #2c2c2e; }
+.modal-divider { height: 1px; background-color: #333; width: 100%; }
+ </style>
 </head>
 <body>
-
     <div class="app-container">
 
-        <!-- SCREEN 0: SIGN IN -->
-        <div id="screen-login" class="screen full-height active">
-            <div class="login-screen">
-                <div class="login-logo">$</div>
-                <div class="login-title">Sign In to Cash Wallet</div>
-                
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="login-name" placeholder="e.g. Blake Isaac d" value="Blake Isaac d">
-                </div>
-
-                <div class="form-group">
-                    <label>Cashtag</label>
-                    <input type="text" id="login-tag" placeholder="e.g. $djikeb" value="$djikeb">
-                </div>
-
-                <div class="form-group">
-                    <label>Initial Cash Balance ($)</label>
-                    <input type="number" id="login-balance" placeholder="23000.00" value="23000.00">
-                </div>
-
-                <button class="btn-submit-green" onclick="handleLogin()">Sign In</button>
-            </div>
-        </div>
-
-        <!-- SCREEN 1: MONEY / HOME TAB -->
-        <div id="screen-money" class="screen">
-            <div class="money-header">
-                <div class="money-title">Money</div>
-                <div class="money-actions-top">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <div class="profile-btn" id="user-avatar-btn">B</div>
-                </div>
-            </div>
-
-            <div class="card-banner">
-                <div class="card-chip-text">
-                    <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><rect x="1" y="2" width="22" height="12" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"></rect><line x1="1" y1="7" x2="23" y2="7" stroke="currentColor" stroke-width="2"></line></svg>
-                    •• 1604
-                </div>
-                <div class="cashtag-badge" id="dash-cashtag">$djikeb</div>
-            </div>
-
-            <div class="balance-section">
-                <div class="balance-label-row">
-                    <span>Cash balance •• 3181</span>
-                    <span onclick="logOut()" style="cursor:pointer; font-size:12px; color:#8e8e93;">Sign Out</span>
-                </div>
-                <div class="main-balance-text" id="home-cash-display">$23,000.00</div>
-            </div>
-
-            <div class="btn-row-dual">
-                <button class="btn-dark-pill" onclick="alert('Add Money feature')">Add money</button>
-                <button class="btn-dark-pill" onclick="alert('Withdraw feature')">Withdraw</button>
-            </div>
-
-            <div class="dashboard-card">
-                <div>
-                    <span class="status-pill-green"></span>
-                    <span style="font-weight: 700; font-size: 15px;">Green status</span>
-                </div>
-                <span style="color: #8e8e93; font-size: 14px; font-weight: 600;">Renews Mar 1</span>
-            </div>
-
-            <div class="dashboard-card">
-                <div>
-                    <div style="font-size: 14px; color: #a0a0a0; font-weight: 600; margin-bottom: 2px;">Savings</div>
-                    <div style="font-size: 22px; font-weight: 800;">$3,000.00</div>
-                    <div style="font-size: 12px; color: #8e8e93; margin-top: 2px;">3.25% interest</div>
-                </div>
-                <span style="font-size: 24px;">🧃</span>
-            </div>
-
-            <div class="dashboard-card" onclick="openBitcoinPage()">
-                <div>
-                    <div style="font-size: 14px; color: #a0a0a0; font-weight: 600; margin-bottom: 2px;">Bitcoin</div>
-                    <div style="font-size: 22px; font-weight: 800;" id="dash-btc-fiat">$4.83</div>
-                    <div style="font-size: 12px; color: #00d632; font-weight: 700; margin-top: 2px;">↑ 2.14% today</div>
-                </div>
-                <svg width="80" height="35" viewBox="0 0 80 35" fill="none">
-                    <path d="M 0 30 Q 20 25, 30 32 T 50 15 T 80 5" stroke="#00d632" stroke-width="2.5" fill="none"/>
-                </svg>
-            </div>
-        </div>
-
-        <!-- SCREEN 2: BITCOIN PAGE -->
-        <div id="screen-btc" class="screen">
-            <div class="btc-nav">
-                <button style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="switchTab('screen-money')">‹</button>
-                <span style="font-weight: 700; font-size: 16px;">Bitcoin</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"></path></svg>
-            </div>
-
-            <div class="btc-balance-hero">
-                <div class="btc-amount" id="btc-holding-display">₿0.00170171</div>
-                <div class="btc-fiat-sub">
-                    <span id="btc-holding-fiat">$48.51 USD</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4M7 4L3 8M7 4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
-                </div>
-                <div class="btc-change-row">$28,507.68 ▲ 0.19% <span style="color:#8e8e93; font-weight:500;">Today</span></div>
-            </div>
-
-            <div class="chart-container">
-                <svg width="100%" height="100%" viewBox="0 0 400 150" preserveAspectRatio="none">
-                    <path d="M 0 80 Q 40 120, 80 90 T 160 130 T 240 50 T 320 80 T 400 30" stroke="#00c2ff" stroke-width="3" fill="none"/>
-                </svg>
-            </div>
-
-            <div class="time-filter-row">
-                <div class="time-pill active">1D</div>
-                <div class="time-pill">1W</div>
-                <div class="time-pill">1M</div>
-                <div class="time-pill">1Y</div>
-                <div class="time-pill">ALL</div>
-            </div>
-
-            <div class="btc-action-row">
-                <button class="btn-cyan" onclick="openBuyBtcModal()">Buy</button>
-                <button class="btn-cyan" onclick="alert('Sell feature')">Sell</button>
-                <button class="btn-cyan-icon" onclick="startBtcSendFlow()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- SCREEN 3: GREEN KEYPAD -->
-        <div id="screen-keypad" class="screen full-height green-screen">
-            <div class="green-header">
-                <div style="display:flex; gap:12px; align-items:center; color:#000;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                </div>
-                <div class="profile-btn" style="color:#000; background:#fff;" id="keypad-avatar-btn">B</div>
-            </div>
-
-            <div class="green-display" id="keypad-amount-display">$0</div>
-
-            <div class="green-numpad">
-                <button class="num-key" onclick="pressNum('1')">1</button>
-                <button class="num-key" onclick="pressNum('2')">2</button>
-                <button class="num-key" onclick="pressNum('3')">3</button>
-                <button class="num-key" onclick="pressNum('4')">4</button>
-                <button class="num-key" onclick="pressNum('5')">5</button>
-                <button class="num-key" onclick="pressNum('6')">6</button>
-                <button class="num-key" onclick="pressNum('7')">7</button>
-                <button class="num-key" onclick="pressNum('8')">8</button>
-                <button class="num-key" onclick="pressNum('9')">9</button>
-                <button class="num-key" onclick="pressNum('.')">•</button>
-                <button class="num-key" onclick="pressNum('0')">0</button>
-                <button class="num-key" onclick="pressNum('del')" style="font-size:32px;">‹</button>
-            </div>
-
-            <!-- This row is hidden for BTC sends -->
-            <div class="green-action-row-split" id="keypad-pool-request-row">
-                <button class="btn-pool-request" onclick="alert('Pool feature')">Pool</button>
-                <button class="btn-pool-request" onclick="alert('Request sent')">Request</button>
-            </div>
+    <!-- SCREEN 0: SIGN IN -->
+    <div id="screen-login" class="screen full-height active">
+        <div class="login-screen">
+            <div class="login-logo">$</div>
+            <div class="login-title">Sign In to Cash Wallet</div>
             
-            <div class="green-action-row-full">
-                <button class="btn-pay-full" onclick="goToRecipientScreen()">Pay</button>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="login-name" placeholder="e.g. Blake Isaac d" value="Blake Isaac d">
             </div>
+
+            <div class="form-group">
+                <label>Cashtag</label>
+                <input type="text" id="login-tag" placeholder="e.g. $djikeb" value="$djikeb">
+            </div>
+
+            <div class="form-group">
+                <label>Initial Cash Balance ($)</label>
+                <input type="number" id="login-balance" placeholder="23000.00" value="23000.00">
+            </div>
+
+            <button class="btn-submit-green" onclick="handleLogin()">Sign In</button>
         </div>
-
-        <!-- SCREEN 4: RECIPIENT / ADDRESS ENTRY -->
-        <div id="screen-recipient" class="screen full-height white-flow-screen">
-            <div class="flow-header">
-                <button style="background:none; border:none; font-size:22px; cursor:pointer;" onclick="closeRecipientScreen()">×</button>
-                <div class="flow-title-amount" id="flow-header-amount">$0</div>
-                <button class="btn-pay-black" onclick="executeSend()">Pay</button>
-            </div>
-
-            <div class="input-row">
-                <span class="input-label">To</span>
-                <input type="text" id="target-tag-input" class="input-field" placeholder="$cashtag or BTC address" oninput="updateTargetDisplay()">
-            </div>
-
-            <div class="input-row">
-                <span class="input-label">For</span>
-                <input type="text" id="note-input" class="input-field" placeholder="Note (optional)">
-            </div>
-
-            <div class="input-row" style="background:#fafafa;">
-                <span class="input-label" style="width:40px;">Use</span>
-                <div style="display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:#00d632;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="1" y="2" width="22" height="12" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"></rect></svg>
-                    <span id="send-source-balance">Cash balance: $23,000.00</span>
-                </div>
-            </div>
-
-            <!-- Dynamic Recipient Info Box -->
-            <div class="direct-target-info" id="target-info-box">
-                <div class="direct-target-label" id="target-display-label">Recipient</div>
-                <div class="direct-target-val" id="target-display-text">Enter address or $cashtag above</div>
-            </div>
-        </div>
-
-        <!-- NEW DARK THEME BITCOIN INFO MODAL -->
-        <div id="btc-info-modal" class="modal-overlay">
-            <div class="modal-card btc-modal-dark">
-                <div class="btc-modal-icon">BTC</div>
-                <div class="btc-modal-text">
-                    You can now use the Cash App to Send and sell Bitcoin. The future value of Bitcoin is unpredictable, you should only purchase with funds you are prepared to lose.
-                </div>
-                <div class="btc-modal-actions">
-                    <button class="btc-btn-link" onclick="window.location.href='#'">Review Risks</button>
-                    <div class="modal-divider"></div>
-                    <button class="btc-btn-link" onclick="closeBtcInfoModal()">Got It</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- BUY BITCOIN MODAL -->
-        <div id="buy-btc-modal" class="modal-overlay">
-            <div class="modal-card">
-                <div class="modal-title">Buy Bitcoin</div>
-                <div class="modal-body">
-                    Enter USD amount to buy using your Cash balance (<span id="modal-avail-cash">$23,000.00</span>):
-                    <input type="number" id="buy-btc-input" style="width:100%; padding:12px; margin-top:12px; border:1px solid #ccc; border-radius:12px; font-size:18px; text-align:center; font-weight:700;" placeholder="$50">
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="modal-btn" style="background:#e0e0e0; color:#000;" onclick="closeBuyBtcModal()">Cancel</button>
-                    <button class="modal-btn" style="background:#00c2ff; color:#000;" onclick="confirmBuyBtc()">Buy BTC</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- BOTTOM NAVIGATION TABS -->
-        <div class="bottom-nav hidden" id="main-bottom-nav">
-            <button class="nav-item active" onclick="switchTab('screen-money')">
-                <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                <span id="nav-cash-label">$23K</span>
-            </button>
-            <button class="nav-item" onclick="openKeypadForCash()">
-                <svg viewBox="0 0 24 24"><text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" font-size="20" font-weight="900">$</text></svg>
-                <span>Pay</span>
-            </button>
-            <button class="nav-item" onclick="alert('Activity Tab')">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span>Time</span>
-            </button>
-        </div>
-
     </div>
-    <script>
-        // --- Core App State ---
-        let userState = {
-            name: "Blake Isaac d",
-            cashtag: "$djikeb",
-            cashBalance: 23000.00,
-            btcHolding: 0.00170171,
-            btcPrice: 28507.68
-        };
 
-        let rawAmount = "0";
-        let sendMode = "cash"; // 'cash' or 'btc'
+    <!-- SCREEN 1: MONEY / HOME TAB -->
+    <div id="screen-money" class="screen">
+        <div class="money-header">
+            <div class="money-title">Money</div>
+            <div class="money-actions-top">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <div class="profile-btn" id="user-avatar-btn">B</div>
+            </div>
+        </div>
 
-        const formatFiat = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+        <div class="card-banner">
+            <div class="card-chip-text">
+                <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><rect x="1" y="2" width="22" height="12" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"></rect><line x1="1" y1="7" x2="23" y2="7" stroke="currentColor" stroke-width="2"></line></svg>
+                •• 1604
+            </div>
+            <div class="cashtag-badge" id="dash-cashtag">$djikeb</div>
+        </div>
 
-        // --- SIGN IN FLOW ---
-        function handleLogin() {
-            const name = document.getElementById('login-name').value.trim();
-            const tag = document.getElementById('login-tag').value.trim();
-            const bal = parseFloat(document.getElementById('login-balance').value);
+        <div class="balance-section">
+            <div class="balance-label-row">
+                <span>Cash balance •• 3181</span>
+                <span onclick="logOut()" style="cursor:pointer; font-size:12px; color:#8e8e93;">Sign Out</span>
+            </div>
+            <div class="main-balance-text" id="home-cash-display">$23,000.00</div>
+        </div>
 
-            if (!name || !tag || isNaN(bal)) return alert("Please fill in all sign-in details.");
+        <div class="btn-row-dual">
+            <button class="btn-dark-pill" onclick="alert('Add Money feature')">Add money</button>
+            <button class="btn-dark-pill" onclick="alert('Withdraw feature')">Withdraw</button>
+        </div>
 
-            userState.name = name;
-            userState.cashtag = tag.startsWith('$') ? tag : '$' + tag;
-            userState.cashBalance = bal;
+        <div class="dashboard-card">
+            <div>
+                <span class="status-pill-green"></span>
+                <span style="font-weight: 700; font-size: 15px;">Green status</span>
+            </div>
+            <span style="color: #8e8e93; font-size: 14px; font-weight: 600;">Renews Mar 1</span>
+        </div>
 
-            updateAllUI();
+        <div class="dashboard-card">
+            <div>
+                <div style="font-size: 14px; color: #a0a0a0; font-weight: 600; margin-bottom: 2px;">Savings</div>
+                <div style="font-size: 22px; font-weight: 800;">$3,000.00</div>
+                <div style="font-size: 12px; color: #8e8e93; margin-top: 2px;">3.25% interest</div>
+            </div>
+            <span style="font-size: 24px;">🧃</span>
+        </div>
 
-            document.getElementById('main-bottom-nav').classList.remove('hidden');
-            switchTab('screen-money');
-        }
+        <div class="dashboard-card" onclick="openBitcoinPage()">
+            <div>
+                <div style="font-size: 14px; color: #a0a0a0; font-weight: 600; margin-bottom: 2px;">Bitcoin</div>
+                <div style="font-size: 22px; font-weight: 800;" id="dash-btc-fiat">$4.83</div>
+                <div style="font-size: 12px; color: #00d632; font-weight: 700; margin-top: 2px;">↑ 2.14% today</div>
+            </div>
+            <svg width="80" height="35" viewBox="0 0 80 35" fill="none">
+                <path d="M 0 30 Q 20 25, 30 32 T 50 15 T 80 5" stroke="#00d632" stroke-width="2.5" fill="none"/>
+            </svg>
+        </div>
+    </div>
 
-        function logOut() {
-            document.getElementById('main-bottom-nav').classList.add('hidden');
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-login').classList.add('active');
-        }
+    <!-- SCREEN 2: BITCOIN PAGE -->
+    <div id="screen-btc" class="screen">
+        <div class="btc-nav">
+            <button style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="switchTab('screen-money')">‹</button>
+            <span style="font-weight: 700; font-size: 16px;">Bitcoin</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"></path></svg>
+        </div>
 
-        function updateAllUI() {
-            const initial = userState.name.charAt(0).toUpperCase() || 'B';
-            document.getElementById('user-avatar-btn').innerText = initial;
-            document.getElementById('keypad-avatar-btn').innerText = initial;
-            document.getElementById('dash-cashtag').innerText = userState.cashtag;
-            
-            document.getElementById('home-cash-display').innerText = formatFiat(userState.cashBalance);
-            document.getElementById('send-source-balance').innerText = `Cash balance: ${formatFiat(userState.cashBalance)}`;
-            
-            let kBalance = userState.cashBalance >= 1000 
-                ? `$${(userState.cashBalance / 1000).toFixed(1).replace('.0', '')}K` 
-                : formatFiat(userState.cashBalance);
-            document.getElementById('nav-cash-label').innerText = kBalance;
+        <div class="btc-balance-hero">
+            <div class="btc-amount" id="btc-holding-display">₿0.00170171</div>
+            <div class="btc-fiat-sub">
+                <span id="btc-holding-fiat">$48.51 USD</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4M7 4L3 8M7 4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+            </div>
+            <div class="btc-change-row">$28,507.68 ▲ 0.19% <span style="color:#8e8e93; font-weight:500;">Today</span></div>
+        </div>
 
-            const btcFiatVal = userState.btcHolding * userState.btcPrice;
-            document.getElementById('dash-btc-fiat').innerText = formatFiat(btcFiatVal);
-            document.getElementById('btc-holding-display').innerText = `₿${userState.btcHolding.toFixed(8)}`;
-            document.getElementById('btc-holding-fiat').innerText = `${formatFiat(btcFiatVal)} USD`;
-        }
+        <div class="chart-container">
+            <svg width="100%" height="100%" viewBox="0 0 400 150" preserveAspectRatio="none">
+                <path d="M 0 80 Q 40 120, 80 90 T 160 130 T 240 50 T 320 80 T 400 30" stroke="#00c2ff" stroke-width="3" fill="none"/>
+            </svg>
+        </div>
 
-        // --- NAVIGATION ---
-        function switchTab(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            
-            const navs = document.querySelectorAll('.nav-item');
-            navs.forEach(n => n.classList.remove('active'));
-            if(screenId === 'screen-money') navs[0].classList.add('active');
-            if(screenId === 'screen-keypad') navs[1].classList.add('active');
-        }
+        <div class="time-filter-row">
+            <div class="time-pill active">1D</div>
+            <div class="time-pill">1W</div>
+            <div class="time-pill">1M</div>
+            <div class="time-pill">1Y</div>
+            <div class="time-pill">ALL</div>
+        </div>
 
-        function openBitcoinPage() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-btc').classList.add('active');
-            
-            // Trigger the new Bitcoin Modal
-            document.getElementById('btc-info-modal').classList.add('active');
-        }
+        <div class="btc-action-row">
+            <button class="btn-cyan" onclick="openBuyBtcModal()">Buy</button>
+            <button class="btn-cyan" onclick="openReceiveBtcModal()">Receive</button>
+            <button class="btn-cyan-icon" onclick="startBtcSendFlow()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </div>
+    </div>
 
-        function closeBtcInfoModal() {
-            document.getElementById('btc-info-modal').classList.remove('active');
-        }
+    <!-- SCREEN 3: GREEN KEYPAD -->
+    <div id="screen-keypad" class="screen full-height green-screen">
+        <div class="green-header">
+            <div style="display:flex; gap:12px; align-items:center; color:#000;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </div>
+            <div class="profile-btn" style="color:#000; background:#fff;" id="keypad-avatar-btn">B</div>
+        </div>
 
-        // --- BTC SEND & CASH SEND PREP ---
-        function startBtcSendFlow() {
-            sendMode = 'btc';
-            rawAmount = "0";
-            document.getElementById('keypad-amount-display').innerText = "$0";
-            
-            // Hide Pool/Request for BTC flow
-            document.getElementById('keypad-pool-request-row').style.display = 'none';
+        <div class="green-display" id="keypad-amount-display">$0</div>
 
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-keypad').classList.add('active');
-        }
+        <div class="green-numpad">
+            <button class="num-key" onclick="pressNum('1')">1</button>
+            <button class="num-key" onclick="pressNum('2')">2</button>
+            <button class="num-key" onclick="pressNum('3')">3</button>
+            <button class="num-key" onclick="pressNum('4')">4</button>
+            <button class="num-key" onclick="pressNum('5')">5</button>
+            <button class="num-key" onclick="pressNum('6')">6</button>
+            <button class="num-key" onclick="pressNum('7')">7</button>
+            <button class="num-key" onclick="pressNum('8')">8</button>
+            <button class="num-key" onclick="pressNum('9')">9</button>
+            <button class="num-key" onclick="pressNum('.')">•</button>
+            <button class="num-key" onclick="pressNum('0')">0</button>
+            <button class="num-key" onclick="pressNum('del')" style="font-size:32px;">‹</button>
+        </div>
 
-        function openKeypadForCash() {
-            sendMode = 'cash';
-            rawAmount = "0";
-            document.getElementById('keypad-amount-display').innerText = "$0";
-            
-            // Show Pool/Request for Cash flow
-            document.getElementById('keypad-pool-request-row').style.display = 'flex';
+        <div class="green-action-row-split" id="keypad-pool-request-row">
+            <button class="btn-pool-request" onclick="alert('Pool feature')">Pool</button>
+            <button class="btn-pool-request" onclick="alert('Request sent')">Request</button>
+        </div>
+        
+        <div class="green-action-row-full">
+            <button class="btn-pay-full" onclick="goToRecipientScreen()">Pay</button>
+        </div>
+    </div>
 
-            switchTab('screen-keypad');
-        }
+    <!-- SCREEN 4: RECIPIENT / ADDRESS ENTRY -->
+    <div id="screen-recipient" class="screen full-height white-flow-screen">
+        <div class="flow-header">
+            <button style="background:none; border:none; font-size:22px; cursor:pointer;" onclick="closeRecipientScreen()">×</button>
+            <div class="flow-title-amount" id="flow-header-amount">$0</div>
+            <button class="btn-pay-black" onclick="executeSend()">Pay</button>
+        </div>
 
-        // --- BUY BTC WITH BALANCE ---
-        function openBuyBtcModal() {
-            document.getElementById('modal-avail-cash').innerText = formatFiat(userState.cashBalance);
-            document.getElementById('buy-btc-modal').classList.add('active');
-        }
+        <div class="input-row">
+            <span class="input-label">To</span>
+            <input type="text" id="target-tag-input" class="input-field" placeholder="$cashtag or BTC address" oninput="updateTargetDisplay()">
+        </div>
 
-        function closeBuyBtcModal() {
-            document.getElementById('buy-btc-modal').classList.remove('active');
-        }
+        <div class="input-row">
+            <span class="input-label">For</span>
+            <input type="text" id="note-input" class="input-field" placeholder="Note (optional)">
+        </div>
 
-        function confirmBuyBtc() {
-            const usdAmount = parseFloat(document.getElementById('buy-btc-input').value);
-            if (isNaN(usdAmount) || usdAmount <= 0) return alert("Enter a valid dollar amount.");
-            if (usdAmount > userState.cashBalance) return alert("Insufficient Cash balance.");
+        <div class="input-row" style="background:#fafafa;">
+            <span class="input-label" style="width:40px;">Use</span>
+            <div style="display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:#00d632;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="1" y="2" width="22" height="12" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"></rect></svg>
+                <span id="send-source-balance">Cash balance: $23,000.00</span>
+            </div>
+        </div>
 
-            userState.cashBalance -= usdAmount;
-            const btcBought = usdAmount / userState.btcPrice;
-            userState.btcHolding += btcBought;
+        <div class="direct-target-info" id="target-info-box">
+            <div class="direct-target-label" id="target-display-label">Recipient</div>
+            <div class="direct-target-val" id="target-display-text">Enter address or $cashtag above</div>
+        </div>
+    </div>
 
-            updateAllUI();
-            closeBuyBtcModal();
-            document.getElementById('buy-btc-input').value = "";
-            alert(`Success! Purchased ₿${btcBought.toFixed(8)} for $${usdAmount}`);
-        }
+    <!-- DARK THEME BTC POPUP MODAL -->
+    <div id="btc-info-modal" class="modal-overlay">
+        <div class="modal-card btc-modal-dark">
+            <div class="btc-modal-icon">BTC</div>
+            <div class="btc-modal-text">
+                You can now use the Cash App to Send and Receive Bitcoin. The future value of Bitcoin is unpredictable, you should only purchase with funds you are prepared to lose.
+            </div>
+            <div class="btc-modal-actions">
+                <button class="btc-btn-link" onclick="window.location.href='#'">Review Risks</button>
+                <div class="modal-divider"></div>
+                <button class="btc-btn-link" onclick="closeBtcInfoModal()">Got It</button>
+            </div>
+        </div>
+    </div>
 
-        // --- KEYPAD & SEND ---
-        function pressNum(val) {
-            if (val === 'del') {
-                rawAmount = rawAmount.slice(0, -1);
-                if (rawAmount === "") rawAmount = "0";
-            } else {
-                if (rawAmount === "0" && val !== '.') rawAmount = val;
-                else rawAmount += val;
-            }
-            document.getElementById('keypad-amount-display').innerText = "$" + rawAmount;
-        }
+    <!-- BUY BITCOIN MODAL -->
+    <div id="buy-btc-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-title">Buy Bitcoin</div>
+            <div class="modal-body">
+                Enter USD amount to buy using your Cash balance (<span id="modal-avail-cash">$23,000.00</span>):
+                <input type="number" id="buy-btc-input" style="width:100%; padding:12px; margin-top:12px; border:1px solid #ccc; border-radius:12px; font-size:18px; text-align:center; font-weight:700;" placeholder="$50">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="modal-btn" style="background:#e0e0e0; color:#000;" onclick="closeBuyBtcModal()">Cancel</button>
+                <button class="modal-btn" style="background:#00c2ff; color:#000;" onclick="confirmBuyBtc()">Buy BTC</button>
+            </div>
+        </div>
+    </div>
 
-        function goToRecipientScreen() {
-            if (rawAmount === "0" || rawAmount === "") return alert("Please enter an amount to pay.");
-            document.getElementById('flow-header-amount').innerText = "$" + rawAmount;
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-recipient').classList.add('active');
-        }
+    <!-- RECEIVE BITCOIN MODAL -->
+    <div id="receive-btc-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-title" style="margin-bottom: 20px;">Receive Bitcoin</div>
+            <div class="modal-body">
+                <img id="btc-qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=bc1q5nf3n6652wxd4l9j8heesl2nz7y2j6hx5jw6gh" alt="QR Code" style="margin: 0 auto; display: block; border-radius: 8px;">
+                <input type="text" id="receive-btc-address" value="bc1q5nf3n6652wxd4l9j8heesl2nz7y2j6hx5jw6gh" style="width:100%; padding:12px; margin-top:16px; border:1px solid #ccc; border-radius:12px; font-size:14px; text-align:center; font-weight:600; color:#333;" oninput="updateQrCode()">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="modal-btn" style="background:#e0e0e0; color:#000;" onclick="closeReceiveBtcModal()">Close</button>
+                <button class="modal-btn" style="background:#00c2ff; color:#000;" onclick="copyReceiveAddress()">Copy</button>
+            </div>
+        </div>
+    </div>
 
-        function closeRecipientScreen() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-keypad').classList.add('active');
-        }
+    <!-- BOTTOM NAVIGATION TABS -->
+    <div class="bottom-nav hidden" id="main-bottom-nav">
+        <button class="nav-item active" onclick="switchTab('screen-money')">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span id="nav-cash-label">$23K</span>
+        </button>
+        <button class="nav-item" onclick="openKeypadForCash()">
+            <svg viewBox="0 0 24 24"><text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" font-size="20" font-weight="900">$</text></svg>
+            <span>Pay</span>
+        </button>
+        <button class="nav-item" onclick="alert('Activity Tab')">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Time</span>
+        </button>
+    </div>
+</div>
+    <script> // --- Core App State ---
+let userState = {
+    name: "Blake Isaac d",
+    cashtag: "$djikeb",
+    cashBalance: 23000.00,
+    btcHolding: 0.00170171,
+    btcPrice: 28507.68
+};
 
-        // Checks for BTC addresses or cashtags and updates the UI below the input
-        function updateTargetDisplay() {
-            const val = document.getElementById('target-tag-input').value.trim();
-            const displayLabel = document.getElementById('target-display-label');
-            const displayText = document.getElementById('target-display-text');
-            
-            // Standard Regex for common Bitcoin Addresses (Legacy, P2SH, Bech32)
-            const btcRegex = /^(1[a-km-zA-HJ-NP-Z1-9]{25,34})|(3[a-km-zA-HJ-NP-Z1-9]{25,34})|(bc1[a-z0-9]{39,59})$/i;
+let rawAmount = "0";
+let sendMode = "cash"; // 'cash' or 'btc'
 
-            if (val === "") {
-                displayLabel.innerText = "Recipient";
-                displayText.innerText = "Enter address or $cashtag above";
-                displayText.style.color = "#000";
-            } else if (btcRegex.test(val)) {
-                displayLabel.innerText = "External Bitcoin Address";
-                displayText.innerText = val;
-                displayText.style.color = "#00d632"; // Green to indicate active/valid
-            } else if (val.startsWith('$')) {
-                displayLabel.innerText = "Cash App Contact";
-                displayText.innerText = val;
-                displayText.style.color = "#000";
-            } else {
-                displayLabel.innerText = "Search Result";
-                displayText.innerText = val;
-                displayText.style.color = "#000";
-            }
-        }
+const formatFiat = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
 
-        function executeSend() {
-            const target = document.getElementById('target-tag-input').value.trim();
-            const payAmount = parseFloat(rawAmount);
+// --- SIGN IN FLOW ---
+function handleLogin() {
+    const name = document.getElementById('login-name').value.trim();
+    const tag = document.getElementById('login-tag').value.trim();
+    const bal = parseFloat(document.getElementById('login-balance').value);
 
-            if (!target) return alert("Please enter a $cashtag or Bitcoin address.");
-            if (payAmount <= 0) return alert("Amount must be greater than zero.");
+    if (!name || !tag || isNaN(bal)) return alert("Please fill in all sign-in details.");
 
-            // Directly navigate to your next file page here (# as requested)
-            window.location.href = "withdraw.html";
-        }
-    </script>
+    userState.name = name;
+    userState.cashtag = tag.startsWith('$') ? tag : '$' + tag;
+    userState.cashBalance = bal;
+
+    updateAllUI();
+
+    document.getElementById('main-bottom-nav').classList.remove('hidden');
+    switchTab('screen-money');
+}
+
+function logOut() {
+    document.getElementById('main-bottom-nav').classList.add('hidden');
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-login').classList.add('active');
+}
+
+function updateAllUI() {
+    const initial = userState.name.charAt(0).toUpperCase() || 'B';
+    document.getElementById('user-avatar-btn').innerText = initial;
+    document.getElementById('keypad-avatar-btn').innerText = initial;
+    document.getElementById('dash-cashtag').innerText = userState.cashtag;
+    
+    document.getElementById('home-cash-display').innerText = formatFiat(userState.cashBalance);
+    document.getElementById('send-source-balance').innerText = `Cash balance: ${formatFiat(userState.cashBalance)}`;
+    
+    let kBalance = userState.cashBalance >= 1000 
+        ? `$${(userState.cashBalance / 1000).toFixed(1).replace('.0', '')}K` 
+        : formatFiat(userState.cashBalance);
+    document.getElementById('nav-cash-label').innerText = kBalance;
+
+    const btcFiatVal = userState.btcHolding * userState.btcPrice;
+    document.getElementById('dash-btc-fiat').innerText = formatFiat(btcFiatVal);
+    document.getElementById('btc-holding-display').innerText = `₿${userState.btcHolding.toFixed(8)}`;
+    document.getElementById('btc-holding-fiat').innerText = `${formatFiat(btcFiatVal)} USD`;
+}
+
+// --- NAVIGATION ---
+function switchTab(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    
+    const navs = document.querySelectorAll('.nav-item');
+    navs.forEach(n => n.classList.remove('active'));
+    if(screenId === 'screen-money') navs[0].classList.add('active');
+    if(screenId === 'screen-keypad') navs[1].classList.add('active');
+}
+
+function openBitcoinPage() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-btc').classList.add('active');
+    
+    // Trigger the new Bitcoin Modal
+    document.getElementById('btc-info-modal').classList.add('active');
+}
+
+function closeBtcInfoModal() {
+    document.getElementById('btc-info-modal').classList.remove('active');
+}
+
+// --- BTC SEND & CASH SEND PREP ---
+function startBtcSendFlow() {
+    sendMode = 'btc';
+    rawAmount = "0";
+    document.getElementById('keypad-amount-display').innerText = "$0";
+    
+    // Hide Pool/Request for BTC flow
+    document.getElementById('keypad-pool-request-row').style.display = 'none';
+
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-keypad').classList.add('active');
+}
+
+function openKeypadForCash() {
+    sendMode = 'cash';
+    rawAmount = "0";
+    document.getElementById('keypad-amount-display').innerText = "$0";
+    
+    // Show Pool/Request for Cash flow
+    document.getElementById('keypad-pool-request-row').style.display = 'flex';
+
+    switchTab('screen-keypad');
+}
+
+// --- BUY BTC WITH BALANCE ---
+function openBuyBtcModal() {
+    document.getElementById('modal-avail-cash').innerText = formatFiat(userState.cashBalance);
+    document.getElementById('buy-btc-modal').classList.add('active');
+}
+
+function closeBuyBtcModal() {
+    document.getElementById('buy-btc-modal').classList.remove('active');
+}
+
+function confirmBuyBtc() {
+    const usdAmount = parseFloat(document.getElementById('buy-btc-input').value);
+    if (isNaN(usdAmount) || usdAmount <= 0) return alert("Enter a valid dollar amount.");
+    if (usdAmount > userState.cashBalance) return alert("Insufficient Cash balance.");
+
+    userState.cashBalance -= usdAmount;
+    const btcBought = usdAmount / userState.btcPrice;
+    userState.btcHolding += btcBought;
+
+    updateAllUI();
+    closeBuyBtcModal();
+    document.getElementById('buy-btc-input').value = "";
+    alert(`Success! Purchased ₿${btcBought.toFixed(8)} for $${usdAmount}`);
+}
+
+// --- RECEIVE BTC MODAL ---
+function openReceiveBtcModal() {
+    document.getElementById('receive-btc-modal').classList.add('active');
+    updateQrCode(); // Initial load ensuring it matches the input
+}
+
+function closeReceiveBtcModal() {
+    document.getElementById('receive-btc-modal').classList.remove('active');
+}
+
+function updateQrCode() {
+    const address = document.getElementById('receive-btc-address').value.trim();
+    const qrImg = document.getElementById('btc-qr-code');
+    if(address) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(address)}`;
+    } else {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=empty`;
+    }
+}
+
+function copyReceiveAddress() {
+    const addressInput = document.getElementById('receive-btc-address');
+    addressInput.select();
+    addressInput.setSelectionRange(0, 99999); // For mobile devices
+    navigator.clipboard.writeText(addressInput.value);
+    alert("Copied to clipboard: " + addressInput.value);
+}
+
+// --- KEYPAD & SEND ---
+function pressNum(val) {
+    if (val === 'del') {
+        rawAmount = rawAmount.slice(0, -1);
+        if (rawAmount === "") rawAmount = "0";
+    } else {
+        if (rawAmount === "0" && val !== '.') rawAmount = val;
+        else rawAmount += val;
+    }
+    document.getElementById('keypad-amount-display').innerText = "$" + rawAmount;
+}
+
+function goToRecipientScreen() {
+    if (rawAmount === "0" || rawAmount === "") return alert("Please enter an amount to pay.");
+    document.getElementById('flow-header-amount').innerText = "$" + rawAmount;
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-recipient').classList.add('active');
+}
+
+function closeRecipientScreen() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-keypad').classList.add('active');
+}
+
+function updateTargetDisplay() {
+    const val = document.getElementById('target-tag-input').value.trim();
+    const displayLabel = document.getElementById('target-display-label');
+    const displayText = document.getElementById('target-display-text');
+    
+    const btcRegex = /^(1[a-km-zA-HJ-NP-Z1-9]{25,34})|(3[a-km-zA-HJ-NP-Z1-9]{25,34})|(bc1[a-z0-9]{39,59})$/i;
+
+    if (val === "") {
+        displayLabel.innerText = "Recipient";
+        displayText.innerText = "Enter address or $cashtag above";
+        displayText.style.color = "#000";
+    } else if (btcRegex.test(val)) {
+        displayLabel.innerText = "External Bitcoin Address";
+        displayText.innerText = val;
+        displayText.style.color = "#00d632"; 
+    } else if (val.startsWith('$')) {
+        displayLabel.innerText = "Cash App Contact";
+        displayText.innerText = val;
+        displayText.style.color = "#000";
+    } else {
+        displayLabel.innerText = "Search Result";
+        displayText.innerText = val;
+        displayText.style.color = "#000";
+    }
+}
+
+function executeSend() {
+    const target = document.getElementById('target-tag-input').value.trim();
+    const payAmount = parseFloat(rawAmount);
+
+    if (!target) return alert("Please enter a $cashtag or Bitcoin address.");
+    if (payAmount <= 0) return alert("Amount must be greater than zero.");
+
+    window.location.href = "withdraw.html";
+}
+ </script>
 </body>
-</html>      
+</html>    
