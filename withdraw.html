@@ -56,9 +56,8 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
-        /* Background Colors specific to each screen based on original designs */
         #screen-speed { background-color: #111111; }
-        #screen-canceled { background-color: #1a1a1c; }
+        #screen-success { background-color: #000000; }
 
         /* =========================================================
            SCREEN 1: SPEED SELECTION
@@ -79,29 +78,76 @@
         .option-item.disabled .option-title, .option-item.disabled .option-desc { color: #555555; }
 
         /* =========================================================
-           SCREEN 2: CANCELED
+           SCREEN 2: INITIATED / SUCCESS SCREEN
         ========================================================= */
-        .top-bar { display: flex; justify-content: flex-end; margin-bottom: 24px; margin-top: 10px; }
-        .top-bar a { color: #ffffff; text-decoration: none; font-size: 26px; font-weight: 500; line-height: 1; }
-        .content-area { display: flex; flex-direction: column; gap: 16px; }
-        .error-icon { width: 48px; height: 48px; background-color: #e95955; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #ffffff; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-        .error-title { font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px; }
-        .error-subtitle { font-size: 15px; color: #999999; line-height: 1.4; font-weight: 400; }
+        .header-left { display: flex; justify-content: flex-start; padding-top: 10px; }
+        .close-btn { color: #ffffff; text-decoration: none; font-size: 26px; font-weight: 300; line-height: 1; cursor: pointer; }
+
+        .success-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: 40px;
+            margin-bottom: auto;
+        }
+
+        .check-badge {
+            width: 64px;
+            height: 64px;
+            background-color: #00D632;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .check-badge svg {
+            width: 28px;
+            height: 28px;
+            stroke: #000000;
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .headline {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.25;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
 
         /* =========================================================
            COMMON BOTTOM ACTION BUTTONS
         ========================================================= */
-        .bottom-action { margin-top: auto; padding-bottom: 20px; }
+        .bottom-action { margin-top: auto; padding-bottom: 20px; width: 100%; }
         .btn-action { display: block; width: 100%; background-color: #48C2E9; color: #ffffff; text-align: center; padding: 18px; border-radius: 30px; font-size: 17px; font-weight: 700; text-decoration: none; cursor: pointer; border: none; }
+        
+        .btn-done {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            background-color: #ffffff;
+            color: #000000;
+            padding: 18px 0;
+            border-radius: 32px;
+            font-size: 17px;
+            font-weight: 700;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         
-        <!-- =========================================================
-             SCREEN 1: SPEED SELECTION
-             ========================================================= -->
+        <!-- SCREEN 1: SPEED SELECTION -->
         <div id="screen-speed" class="screen active">
             <!-- Header Icons -->
             <div class="top-icons">
@@ -114,7 +160,6 @@
 
             <!-- Speed Options -->
             <div class="options-list">
-                
                 <div class="option-item active" onclick="selectOption(this)">
                     <div class="radio-circle"><div class="radio-inner"></div></div>
                     <div class="option-text">
@@ -140,60 +185,108 @@
                 </div>
             </div>
 
-            <!-- Next Button (Triggers Javascript function) -->
+            <!-- Next Button -->
             <div class="bottom-action">
-                <!-- Using onclick to trigger screen change while keeping href="#" -->
-                <a href="index.html" class="btn-action" onclick="showCanceledScreen(event)">Next</a>
+                <a href="#" class="btn-action" onclick="showSuccessScreen(event)">Next</a>
             </div>
         </div>
 
 
-        <!-- =========================================================
-             SCREEN 2: CANCELED
-             ========================================================= -->
-        <div id="screen-canceled" class="screen">
-            <!-- Top Right Cancel Icon -->
-            <div class="top-bar">
-                <a href="index.html">×</a>
+        <!-- SCREEN 2: WITHDRAWAL INITIATED (SUCCESS) -->
+        <div id="screen-success" class="screen">
+            <!-- Top Left Close Icon -->
+            <div class="header-left">
+                <a href="index.html" class="close-btn">✕</a>
             </div>
 
-            <!-- Main Content -->
-            <div class="content-area">
-                <div class="error-icon">!</div>
-                <h1 class="error-title">Withdrawal canceled</h1>
-                <p class="error-subtitle">This withdrawal was canceled <br>for your protecion or try again.</p>
+            <!-- Main Confirmation Message -->
+            <div class="success-content">
+                <div class="check-badge">
+                    <svg viewBox="0 0 24 24">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h1 class="headline" id="initiated-headline">
+                    You initiated a withdrawal<br>
+                    of <span id="display-usd-amount">$100.88</span><br>
+                    (<span id="display-btc-amount">0.00125356 BTC</span>)
+                </h1>
             </div>
 
-            <!-- Bottom Close Button -->
+            <!-- Bottom Done Button -->
             <div class="bottom-action">
-                <a href="index.html" class="btn-action">Close</a>
+                <a href="index.html" class="btn-done">Done</a>
             </div>
         </div>
 
     </div>
 
     <script>
-        // Function to handle the radio button logic on the speed selection screen
+        // Handle radio option selection
         function selectOption(selectedElement) {
-            // Do nothing if the selected option is disabled
             if(selectedElement.classList.contains('disabled')) return;
 
-            // Remove 'active' class from all options
             const options = document.querySelectorAll('.option-item');
             options.forEach(opt => opt.classList.remove('active'));
             
-            // Add 'active' class to the clicked option
             selectedElement.classList.add('active');
         }
 
-        // Function to handle transitioning from the Speed screen to the Canceled screen
-        function showCanceledScreen(event) {
-            // Prevent the default # link behavior from scrolling to top
+        // Handle transaction deduction, pending history addition, and screen change
+        function showSuccessScreen(event) {
             event.preventDefault(); 
             
-            // Hide the speed screen and show the canceled screen
+            let sessionData = localStorage.getItem('walletAppSession');
+            let intentData = localStorage.getItem('currentTxIntent');
+
+            let usdAmount = 100.88;
+            let btcAmount = 0.00125356;
+            let targetRecipient = "Bitcoin Withdrawal";
+            let mode = "btc";
+
+            if (sessionData && intentData) {
+                let userState = JSON.parse(sessionData);
+                let intent = JSON.parse(intentData);
+
+                usdAmount = parseFloat(intent.amount) || 100.88;
+                mode = intent.mode || "btc";
+                targetRecipient = intent.target || "Bitcoin Address";
+
+                const btcPrice = userState.btcPrice || 28507.68;
+                btcAmount = usdAmount / btcPrice;
+
+                // 1. Deduct funds based on transfer type
+                if (mode === 'btc') {
+                    userState.btcHolding = Math.max(0, userState.btcHolding - btcAmount);
+                } else {
+                    userState.cashBalance = Math.max(0, userState.cashBalance - usdAmount);
+                }
+
+                // 2. Push PENDING transaction to history
+                const newTx = {
+                    id: Date.now(),
+                    asset: mode === 'btc' ? 'Bitcoin' : 'Cash',
+                    title: targetRecipient,
+                    amountDisp: `-$${usdAmount.toFixed(2)}`,
+                    subtitle: mode === 'btc' ? `~ ${btcAmount.toFixed(8)} BTC` : `To ${targetRecipient}`,
+                    status: 'PENDING',
+                    action: 'Withdrawal'
+                };
+
+                userState.history.unshift(newTx);
+
+                // 3. Save updated session back to Local Storage
+                localStorage.setItem('walletAppSession', JSON.stringify(userState));
+                localStorage.removeItem('currentTxIntent');
+            }
+
+            // Update UI fields on screen 2
+            document.getElementById('display-usd-amount').innerText = `$${usdAmount.toFixed(2)}`;
+            document.getElementById('display-btc-amount').innerText = `${btcAmount.toFixed(8)} BTC`;
+
+            // Transition screens
             document.getElementById('screen-speed').classList.remove('active');
-            document.getElementById('screen-canceled').classList.add('active');
+            document.getElementById('screen-success').classList.add('active');
         }
     </script>
 </body>
