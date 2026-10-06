@@ -192,7 +192,7 @@ body { background-color: #000000; display: flex; justify-content: center; align-
         <div class="dashboard-card" onclick="openBitcoinPage()">
             <div>
                 <div style="font-size: 14px; color: #a0a0a0; font-weight: 600; margin-bottom: 2px;">Bitcoin</div>
-                <div style="font-size: 22px; font-weight: 800;" id="dash-btc-fiat">$4.83</div>
+                <div style="font-size: 22px; font-weight: 800;" id="dash-btc-fiat">$223.51</div>
                 <div style="font-size: 12px; color: #00d632; font-weight: 700; margin-top: 2px;">↑ 2.14% today</div>
             </div>
             <svg width="80" height="35" viewBox="0 0 80 35" fill="none">
@@ -210,9 +210,9 @@ body { background-color: #000000; display: flex; justify-content: center; align-
         </div>
 
         <div class="btc-balance-hero">
-            <div class="btc-amount" id="btc-holding-display">₿0.00170171</div>
+            <div class="btc-amount" id="btc-holding-display">₿0.00784034</div>
             <div class="btc-fiat-sub">
-                <span id="btc-holding-fiat">$48.51 USD</span>
+                <span id="btc-holding-fiat">$223.51 USD</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4M7 4L3 8M7 4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
             </div>
             <div class="btc-change-row">$28,507.68 ▲ 0.19% <span style="color:#8e8e93; font-weight:500;">Today</span></div>
@@ -375,7 +375,7 @@ let userState = {
     name: "Blake Isaac d",
     cashtag: "$djikeb",
     cashBalance: 23000.00,
-    btcHolding: 0.00170171,
+    btcHolding: 0.00784034, // Updated to equal $223.51 (original $48.51 + $175) based on btcPrice
     btcPrice: 28507.68
 };
 
@@ -533,8 +533,13 @@ function pressNum(val) {
     if (val === 'del') {
         rawAmount = rawAmount.slice(0, -1);
         if (rawAmount === "") rawAmount = "0";
+    } else if (val === '.') {
+        // Fix: Prevent multiple decimals
+        if (!rawAmount.includes('.')) {
+            rawAmount += val;
+        }
     } else {
-        if (rawAmount === "0" && val !== '.') rawAmount = val;
+        if (rawAmount === "0") rawAmount = val;
         else rawAmount += val;
     }
     document.getElementById('keypad-amount-display').innerText = "$" + rawAmount;
