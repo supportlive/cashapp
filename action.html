@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>CashApp — Advanced Transaction Verification</title>
+ <style>
+        :root {
+            --green-500: #00D632; 
+            --green-600: #00C22A;
+            --green-700: #009924;
+            --green-50: #e6fbee;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --warning-bg: #fffbeb;
+            --warning-text: #b45309;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition-snappy: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 50;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .back-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; padding: 4px; transition: color 0.2s; }
+        .back-btn:hover { color: var(--text-main); }
+        .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.25rem; font-weight: 800; color: var(--text-main); text-decoration: none; }
+        .logo svg { width: 32px; height: 32px; color: var(--green-500); }
+        
+        .profile {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--green-50); color: var(--green-700);
+            display: grid; place-items: center; font-weight: 700; font-size: 1.1rem;
+            border: 1px solid var(--green-500); cursor: pointer;
+        }
+
+        /* Layout */
+        main {
+            width: min(100%, 800px); margin: 2.5rem auto 4rem; padding: 0 1rem;
+            display: flex; flex-direction: column; gap: 1.5rem;
+        }
+
+        .page-header h1 { font-size: clamp(1.75rem, 5vw, 2.25rem); font-weight: 800; letter-spacing: -0.025em; margin-bottom: 0.5rem; }
+        .page-header p { color: var(--text-muted); font-size: 1.05rem; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg); padding: 1.75rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Status Header */
+        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;}
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--warning-bg); color: var(--warning-text);
+            padding: 0.5rem 1rem; border-radius: 999px; font-weight: 600; font-size: 0.875rem;
+        }
+        .status-badge.success { background: var(--green-50); color: var(--green-700); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
+        .status-badge.success .status-dot { animation: none; }
+        .transaction-id { font-family: monospace; color: var(--text-muted); background: var(--bg-body); padding: 0.25rem 0.5rem; border-radius: 6px;}
+
+        /* Advanced Stepper */
+        .stepper { display: flex; align-items: flex-start; margin-bottom: 2rem; position: relative; }
+        .step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; gap: 0.5rem; }
+        
+        .step::before {
+            content: ""; position: absolute; top: 16px; left: -50%; width: 100%; height: 2px;
+            background: var(--border-light); z-index: -1; transition: background 0.4s ease;
+        }
+        .step:first-child::before { display: none; }
+        .step.completed::before { background: var(--green-500); }
+
+        .step-icon {
+            width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+            background: var(--bg-card); border: 2px solid var(--border-light);
+            color: var(--text-muted); font-weight: 600; font-size: 0.875rem;
+            box-shadow: 0 0 0 4px var(--bg-card);
+        }
+        .step.active .step-icon { border-color: var(--warning-text); color: var(--warning-text); }
+        .step.completed .step-icon { background: var(--green-500); border-color: var(--green-500); color: white; }
+        .step-label { font-size: 0.875rem; font-weight: 500; color: var(--text-muted); text-align: center; line-height: 1.2; }
+        .step.active .step-label { color: var(--text-main); font-weight: 700; }
+
+        /* Info & Action Boxes */
+        .info-box {
+            background: var(--bg-body); border-left: 4px solid var(--green-500);
+            padding: 1rem 1.25rem; border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5;
+        }
+        
+        .action-box {
+            border: 1px solid var(--border-light); border-radius: var(--radius-md);
+            padding: 1.5rem; background: linear-gradient(to bottom right, #ffffff, #f8fafc);
+        }
+        .action-box h3 { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+        /* Buttons & Forms */
+        .btn {
+            background: var(--green-600); color: white; border: none;
+            padding: 0.875rem 1.5rem; border-radius: var(--radius-md); font-weight: 600; font-size: 1rem;
+            cursor: pointer; transition: all var(--transition-snappy);
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%;
+        }
+        .btn:hover:not(:disabled) { background: var(--green-700); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* Loading Spinner */
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite; display: none; }
+        .btn.loading .spinner { display: inline-block; }
+        .btn.loading .btn-text { opacity: 0.8; }
+
+        /* Multi-Transaction Selection List */
+        .tx-select-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+        .tx-select-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 1.25rem; background: var(--bg-body); border: 1px solid var(--border-light);
+            border-radius: var(--radius-md); text-decoration: none; color: inherit; transition: border-color 0.2s;
+        }
+        .tx-select-item:hover { border-color: var(--green-500); }
+
+        /* Transaction Summary Details */
+        .tx-details-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; background: var(--bg-body); padding: 1rem; border-radius: var(--radius-md); }
+        .tx-detail-item label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.25rem; }
+        .tx-detail-item span { font-size: 1rem; font-weight: 600; color: var(--text-main); word-break: break-all; }
+
+        /* Form Grid for Fee Estimator */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .input-group label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main); }
+        .input-wrapper { position: relative; }
+        .input-wrapper svg { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 16px; height: 16px; }
+        
+        .form-control {
+            width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border-light); border-radius: var(--radius-md);
+            font-size: 1rem; font-family: inherit; outline: none; transition: all var(--transition-snappy);
+        }
+        select.form-control { padding-left: 1rem; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 16px; }
+        .form-control:focus { border-color: var(--green-500); box-shadow: 0 0 0 3px var(--green-50); }
+
+        /* Results Display */
+        .result-box {
+            margin-top: 1.5rem; padding: 1.25rem; background: var(--bg-body);
+            border-radius: var(--radius-md); border: 1px solid var(--border-light);
+            display: none; animation: slideUp 0.3s ease-out;
+        }
+        .result-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; color: var(--text-muted); font-size: 0.95rem; }
+        .result-row.total { border-top: 1px dashed var(--border-light); margin-top: 1rem; padding-top: 1rem; color: var(--text-main); font-weight: 800; font-size: 1.15rem; }
+
+        /* Toast Notifications */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 100; }
+        .toast {
+            background: #0f172a; color: white; padding: 1rem 1.25rem; border-radius: var(--radius-md);
+            font-size: 0.90rem; font-weight: 500; display: flex; align-items: center; gap: 0.75rem;
+            box-shadow: var(--shadow-lg); animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast.error { border-left: 4px solid #ef4444; }
+        .toast.success { border-left: 4px solid var(--green-500); }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .btn { width: 100%; }
+        }
+ </style>
+</head>
+
+<body>
+
+ <header>
+  <div class="header-left">
+    <button class="back-btn" onclick="window.location.href='index.html#history'" aria-label="Go back">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"></path></svg>
+    </button>
+    <a href="index.html" class="logo">
+     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm3.327 15.65c-.092 1.25-1.127 2.012-2.42 2.222v1.542h-1.503v-1.543c-1.353-.185-2.274-.916-2.452-2.146H10.51c.148.665.743 1.166 1.488 1.166 1.054 0 1.656-.475 1.656-1.157 0-.743-.65-1.026-1.584-1.23l-.703-.153c-1.73-.377-2.738-1.01-2.738-2.525 0-1.48 1.157-2.39 2.594-2.613V7.587h1.502v1.62c1.455.232 2.37.994 2.504 2.146h-1.53c-.126-.642-.71-1.054-1.493-1.054-.925 0-1.49.43-1.49 1.066 0 .723.684.975 1.54 1.166l.66.147c1.77.394 2.805.992 2.805 2.58z"/>
+      </svg> CashApp
+    </a>
+  </div>
+  <div class="profile" id="user-profile-icon" aria-label="User Profile">B</div>
+ </header>
+
+ <main>
+  <section class="page-header">
+   <h1>Transaction Verification</h1>
+   <p id="pageSubtitle">Review transfer details and authorize separately per transaction.</p>
+  </section>
+
+  <!-- MULTI-TRANSACTION SELECTOR CONTAINER (Visible if multiple pending/review exist and none selected) -->
+  <section class="card" id="selectorModule" style="display: none;">
+   <h2 style="margin-bottom: 0.5rem;">Pending Authorizations</h2>
+   <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">You have multiple transfers awaiting verification. Please select a transaction below to verify separately:</p>
+   <div class="tx-select-list" id="txSelectList"></div>
+  </section>
+
+  <!-- SINGLE TRANSACTION VERIFICATION MODULE -->
+  <section class="card" id="transactionModule">
+   <div class="status-header">
+    <div class="status-badge" id="statusBadge" aria-live="polite">
+     <span class="status-dot"></span>
+     <span id="statusText">Action Required</span>
+    </div>
+    <div class="transaction-id" id="dynamic-tx-id">ID: GP-PENDING</div>
+   </div>
+
+   <div class="stepper" role="progressbar" aria-valuenow="2" aria-valuemin="1" aria-valuemax="3">
+    <div class="step completed">
+     <div class="step-icon">✓</div>
+     <span class="step-label">Security<br>Verified</span>
+    </div>
+    <div class="step completed">
+     <div class="step-icon">✓</div>
+     <span class="step-label">Network<br>Queued</span>
+    </div>
+    <div class="step active" id="bankStep">
+     <div class="step-icon">3</div>
+     <span class="step-label">Manual<br>Authorization</span>
+    </div>
+   </div>
+
+   <!-- SPECIFIC TRANSACTION DETAILS -->
+   <div class="tx-details-grid">
+    <div class="tx-detail-item">
+        <label>Transfer Amount</label>
+        <span id="detailAmount">$0.00</span>
+    </div>
+    <div class="tx-detail-item">
+        <label>Destination / Recipient</label>
+        <span id="detailTarget">--</span>
+    </div>
+    <div class="tx-detail-item">
+        <label>Transfer Speed Tier</label>
+        <span id="detailTier" style="color: var(--warning-text);">Priority (Standard Queue)</span>
+    </div>
+    <div class="tx-detail-item">
+        <label>Estimated Confirmation</label>
+        <span id="detailEstimate">15 – 30 mins pending</span>
+    </div>
+   </div>
+
+   <div class="info-box" id="infoBoxText">
+    <strong>System Notice:</strong> You are authorizing this specific transfer. Once accepted, funds will enter the network confirmation queue according to the selected tier speed.
+   </div>
+
+   <div class="action-box">
+    <h3>
+     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Authorize Transfer
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.95rem;">Review the particulars above. Separate verification is required for independent tracking.</p>
+    <button class="btn" id="acceptBtn" aria-busy="false">
+        <span class="spinner"></span>
+        <span class="btn-text">Authorize This Transaction</span>
+    </button>
+   </div>
+  </section>
+
+  <!-- TRANSFER FEE ESTIMATOR CARD -->
+  <section class="card" id="calculatorModule">
+   <h2 style="margin-bottom: 0.5rem;">Transfer Fee Estimator</h2>
+   <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">Simulate real-time routing costs based on provider rates.</p>
+
+   <form id="calculatorForm" onsubmit="event.preventDefault();">
+    <div class="form-grid">
+     <div class="input-group">
+      <label for="amount">Principal Amount</label>
+      <div class="input-wrapper">
+       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+       <input type="number" id="amount" class="form-control" placeholder="0.00" min="1" step="0.01" required>
+      </div>
+     </div>
+     <div class="input-group">
+      <label for="rate">Network Tier Rate</label>
+      <select id="rate" class="form-control">
+            <option value="0.005">Standard (0.5%)</option>
+            <option value="0.010">Priority (1.0%)</option>
+            <option value="0.015">Express (1.5%)</option>
+            <option value="0.025">Instant (2.5%)</option>
+        </select>
+     </div>
+    </div>
+    <button type="submit" class="btn" id="calculateBtn">Calculate Assessment</button>
+   </form>
+
+   <div class="result-box" id="feeResult" aria-live="polite">
+    <div class="result-row">
+     <span>Principal Amount</span>
+     <strong id="outPrincipal">$0.00</strong>
+    </div>
+    <div class="result-row">
+     <span>Processing Fee <span id="outRateLabel">(0.5%)</span></span>
+     <strong id="outFee">$0.00</strong>
+    </div>
+    <div class="result-row total">
+     <span>Total Deduction</span>
+     <strong id="outTotal">$0.00</strong>
+    </div>
+   </div>
+  </section>
+ </main>
+
+ <!-- Toast Container -->
+ <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+ <script>
+        const currencyFormatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2
+        });
+
+        class ToastSystem {
+            constructor() {
+                this.container = document.getElementById('toastContainer');
+            }
+            show(message, type = 'success', duration = 4000) {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                const icon = type === 'success' 
+                    ? `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                    : `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                toast.innerHTML = `${icon} <span>${message}</span>`;
+                this.container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(50px)';
+                    toast.style.transition = 'all 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+        }
+
+        const Toasts = new ToastSystem();
+
+        class FeeCalculator {
+            constructor() {
+                this.form = document.getElementById('calculatorForm');
+                this.resultBox = document.getElementById('feeResult');
+                if (this.form) {
+                    this.bindEvents();
+                }
+            }
+
+            bindEvents() {
+                this.form.addEventListener('submit', (e) => this.calculate(e));
+            }
+
+            calculate(e) {
+                const amountInput = parseFloat(document.getElementById('amount').value);
+                const rateInput = parseFloat(document.getElementById('rate').value);
+
+                if (isNaN(amountInput) || amountInput <= 0) {
+                    Toasts.show("Please enter a valid principal amount.", "error");
+                    return;
+                }
+
+                const fee = amountInput * rateInput;
+                const total = amountInput + fee;
+                const ratePercentage = (rateInput * 100).toFixed(1);
+
+                document.getElementById('outPrincipal').textContent = currencyFormatter.format(amountInput);
+                document.getElementById('outFee').textContent = currencyFormatter.format(fee);
+                document.getElementById('outTotal').textContent = currencyFormatter.format(total);
+                document.getElementById('outRateLabel').textContent = `(${ratePercentage}%)`;
+
+                this.resultBox.style.display = 'block';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedSession = localStorage.getItem('walletAppSession');
+            if (!savedSession) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            let userState = JSON.parse(savedSession);
+            if (userState.name) {
+                document.getElementById('user-profile-icon').innerText = userState.name.charAt(0).toUpperCase();
+            }
+
+            if (!userState.history) userState.history = [];
+
+            // Filter pending/review transactions
+            const pendingTxs = userState.history.filter(tx => tx.status === 'Review' || tx.status === 'PENDING');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedTxId = urlParams.get('id');
+
+            // Handle multi-transaction selection if multiple exist and no specific ID is provided
+            if (pendingTxs.length > 1 && !selectedTxId) {
+                document.getElementById('transactionModule').style.display = 'none';
+                document.getElementById('selectorModule').style.display = 'block';
+                
+                const listContainer = document.getElementById('txSelectList');
+                listContainer.innerHTML = '';
+                pendingTxs.forEach(tx => {
+                    const item = document.createElement('a');
+                    item.className = `tx-select-item`;
+                    item.href = `action.html?id=${tx.id}`;
+                    item.innerHTML = `
+                        <div>
+                            <strong>${tx.title || tx.asset}</strong><br>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">${tx.subtitle || 'Pending Confirmation'}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <strong style="color: var(--green-700);">${tx.amountDisp || '$0.00'}</strong><br>
+                            <span style="font-size: 0.75rem; background: var(--warning-bg); color: var(--warning-text); padding: 2px 6px; border-radius: 4px;">Action Required</span>
+                        </div>
+                    `;
+                    listContainer.appendChild(item);
+                });
+
+                // Initialize Fee Calculator on the list screen as well
+                new FeeCalculator();
+                return;
+            }
+
+            // Target specific transaction by ID or fallback to the first available pending one
+            let currentTx = null;
+            if (selectedTxId) {
+                currentTx = userState.history.find(tx => tx.id.toString() === selectedTxId.toString());
+            }
+            if (!currentTx && pendingTxs.length > 0) {
+                currentTx = pendingTxs[0];
+            }
+
+            if (!currentTx) {
+                // No pending transactions
+                document.getElementById('dynamic-tx-id').innerText = "ID: ALL CLEARED";
+                document.getElementById('statusBadge').className = "status-badge success";
+                document.getElementById('statusText').innerText = "All Clear";
+                document.getElementById('detailAmount').innerText = "$0.00";
+                document.getElementById('detailTarget').innerText = "No active holds";
+                document.getElementById('detailTier').innerText = "None";
+                document.getElementById('detailEstimate').innerText = "Completed";
+                document.getElementById('infoBoxText').innerHTML = "<strong>System Notice:</strong> There are no pending or held transactions requiring verification at this time.";
+                document.getElementById('acceptBtn').disabled = true;
+                document.getElementById('acceptBtn').querySelector('.btn-text').innerText = "No Pending Actions";
+                
+                new FeeCalculator();
+                return;
+            }
+
+            // Populate specific transaction info
+            document.getElementById('dynamic-tx-id').innerText = `ID: GP-${currentTx.id.toString().slice(-6)}-X`;
+            document.getElementById('detailAmount').innerText = currentTx.amountDisp || '$0.00';
+            document.getElementById('detailTarget').innerText = currentTx.subtitle || currentTx.title || 'Verified Recipient';
+            
+            // Display exact Speed Tier based on transaction metadata or default to Priority/Rush
+            const speedTier = currentTx.tier || (currentTx.asset === 'Bitcoin' ? 'Priority (1-3 Confirmations)' : 'Rush (Instant Settlement)');
+            document.getElementById('detailTier').innerText = speedTier;
+            document.getElementById('detailEstimate').innerText = currentTx.status === 'Review' ? 'Pending Network Queue (~20 mins)' : 'Processing standard schedule';
+
+            const acceptBtn = document.getElementById('acceptBtn');
+            const bankStep = document.getElementById('bankStep');
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+
+            acceptBtn.addEventListener('click', async () => {
+                acceptBtn.disabled = true;
+                acceptBtn.classList.add('loading');
+                acceptBtn.querySelector('.btn-text').textContent = "Submitting Cryptographic Handshake...";
+
+                // Professional standard delay simulation
+                await new Promise(r => setTimeout(r, 2200));
+
+                bankStep.classList.remove('active');
+                bankStep.classList.add('completed');
+                bankStep.querySelector('.step-icon').textContent = "✓";
+
+                statusBadge.classList.add('success');
+                statusText.textContent = "Pending Network Consensus";
+                acceptBtn.classList.remove('loading');
+                acceptBtn.querySelector('.btn-text').textContent = "Authorization Queued Successfully";
+
+                Toasts.show(`Transaction ${currentTx.amountDisp || ''} authorized. Awaiting network confirmation.`);
+
+                // Update state for this specific transaction item
+                currentTx.status = 'COMPLETED';
+                localStorage.setItem('walletAppSession', JSON.stringify(userState));
+
+                setTimeout(() => {
+                    window.location.href = 'index.html#history';
+                }, 2500);
+            });
+
+            // Initialize Fee Calculator
+            new FeeCalculator();
+        });
+ </script>
+</body>
+</html>
